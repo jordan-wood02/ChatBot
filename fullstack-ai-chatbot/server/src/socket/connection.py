@@ -4,7 +4,7 @@ from fastapi import WebSocket
 class ConnectionManager:
     def __init__(self):
         # List of all active connections
-        self.active_connections: List[WebSocket] = []
+        self.active_connections: list[WebSocket] = []
 
     # Accept WebSocket and add to list of active connections
     async def connect(self, websocket: WebSocket):
