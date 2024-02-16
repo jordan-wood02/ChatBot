@@ -5,7 +5,10 @@ from typing import Optional
 async def get_token(
         websocket: WebSocket,
         token: Optional[str] = Query(None)):
+    # Check if token is None or null
     if token is None or token == "":
+        # If yes, return policy violation status and, if available,
+        # return the token
         await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
 
     return token

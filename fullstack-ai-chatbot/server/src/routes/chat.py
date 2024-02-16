@@ -1,7 +1,8 @@
 import os
-from fastapi import APIRouter, FastAPI, WebSocket, Request, BackgroundTasks, HTTPException
+from fastapi import APIRouter, FastAPI, WebSocket, WebSocketDisconnect, Request, Depends, HTTPException
 import uuid
 from ..socket.connection import ConnectionManager
+from ..socket.utils import get_token
 
 chat = APIRouter()
 manager = ConnectionManager()
@@ -19,7 +20,7 @@ async def token_generator(name: str, request: Request):
         raise HTTPException(status_code=400, detail={
             "loc": "name", "msg": "Enter a valid name"})
 
-    # Using uuid4 to generate token because
+    # Using uuid4 to generate tokens because
     # it's a publicly available endpoint
     token = str(uuid.uuid4())
 
@@ -44,7 +45,7 @@ async def refresh_token(request: Request):
 
 @chat.websocket("/chat")
 # Take a WebSocket and add to connection manager
-async def websocket_endpoint(websocket: WebSocket):
+async def websocket_endpoint(websocket: WebSocket, token: str = Depends(get_token)):
     await manager.connect(websocket)
     try:
         # Run a while True loop to ensure socket stays open
@@ -52,7 +53,8 @@ async def websocket_endpoint(websocket: WebSocket):
             # Receive any messages sent by client and print to terminal for now
             data = await websocket.receive_text()
             print(data)
-            await manager.send_personal_message(f"Response: Simulating response from the GPT service", websocket)
+            await manager.send_personal_message(f"Response: Hello! "
+                                                f"Currently being worked on to include more chat options.", websocket)
 
     # Except when the socket gets disconnected
     except WebSocketDisconnect:
